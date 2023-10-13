@@ -33,24 +33,37 @@ public class UserServiceImpl implements UserService{
         List<UserDto> users=parseCSVFile(file); //from down
         log.info("saving list of users of size {}", users.size(), Thread.currentThread().getName());
 
-        List<UserEntity>userEntityList=new ArrayList<>();
-        for(UserDto userDot:users){
-            UserEntity userEntity=new UserEntity();
-            BeanUtils.copyProperties(userDot,userEntity);
-            userEntityList.add(userEntity);
-        }
+        List<UserEntity> userEntityList = users.stream().map(userDto -> {
+            UserEntity userEntity = new UserEntity();
+            BeanUtils.copyProperties(userDto, userEntity);
+            return userEntity;
+        }).collect(Collectors.toList());
 
-        List<UserEntity> usersssss=userRepository.saveAll(userEntityList);
+//        List<UserEntity>userEntityList=new ArrayList<>();
+//        for(UserDto userDot:users){
+//            UserEntity userEntity=new UserEntity();
+//            BeanUtils.copyProperties(userDot,userEntity);
+//            userEntityList.add(userEntity);
+//        }
+
+        List<UserEntity> userss=userRepository.saveAll(userEntityList);
        // List<UserEntity> usersssss = CompletableFuture.supplyAsync(() -> userRepository.saveAll(userEntityList)).join();
 
         long end=System.currentTimeMillis();
 
-       List<UserDto> userDtoList=new ArrayList<>();
-       for(UserEntity userEntity:usersssss){
-           UserDto userDto=new UserDto();
-           BeanUtils.copyProperties(userEntity,userDto);
-           userDtoList.add(userDto);
-       }
+        List<UserDto> userDtoList = userss.stream().map(userEntity -> {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity, userDto);
+            return userDto;
+        }).collect(Collectors.toList());
+
+//       List<UserDto> userDtoList=new ArrayList<>();
+//       for(UserEntity userEntity:userss){
+//           UserDto userDto=new UserDto();
+//           BeanUtils.copyProperties(userEntity,userDto);
+//           userDtoList.add(userDto);
+//       }
+
         log.info("Total time {}", (end - start));
 
         return CompletableFuture.completedFuture(userDtoList);
@@ -60,13 +73,19 @@ public class UserServiceImpl implements UserService{
     @Override
     public CompletableFuture<List<UserDto>> findAllRecord() {
         log.info("get list of user by "+Thread.currentThread().getName());
-      List<UserEntity>userEntityList= userRepository.findAll();
-        List<UserDto>userDtoList=new ArrayList<>();
-        for(UserEntity userEntity:userEntityList){
-            UserDto userDto=new UserDto();
-            BeanUtils.copyProperties(userEntity,userDto);
-            userDtoList.add(userDto);
-        }
+        List<UserEntity> userEntityList = userRepository.findAll();
+        List<UserDto> userDtoList = userEntityList.stream().map(userEntity -> {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity, userDto);
+            return userDto;
+        }).collect(Collectors.toList());
+
+//        List<UserDto>userDtoList=new ArrayList<>();
+//        for(UserEntity userEntity:userEntityList){
+//            UserDto userDto=new UserDto();
+//            BeanUtils.copyProperties(userEntity,userDto);
+//            userDtoList.add(userDto);
+//        }
         return CompletableFuture.completedFuture(userDtoList);
     }
 
